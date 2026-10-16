@@ -1,0 +1,643 @@
+openapi: 3.0.3
+info:
+  title: EventHub API
+  version: 1.0.0
+  description: API REST EventHub. Les routes métier sont préfixées par /api ; /health est à la racine.
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: Santé
+  - name: Authentification
+  - name: Événements
+  - name: Participants
+  - name: Inscriptions
+  - name: Tableau de bord
+  - name: Utilisateurs
+paths:
+  /health:
+    get:
+      tags: [Santé]
+      summary: Vérifier la disponibilité de l’API
+      responses:
+        '200':
+          description: API disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+  /api/auth/login:
+    post:
+      tags: [Authentification]
+      summary: Se connecter et obtenir un JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 1 }
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/auth/me:
+    get:
+      tags: [Authentification]
+      summary: Obtenir l’utilisateur authentifié
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Utilisateur connecté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/events:
+    get:
+      tags: [Événements]
+      summary: Lister les événements avec filtres et pagination
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [draft, published, cancelled] }
+        - name: date
+          in: query
+          description: Jour de l’événement au format AAAA-MM-JJ
+          schema: { type: string, format: date }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Résultats paginés
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedEvents' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Événements]
+      summary: Créer un événement (statut initial brouillon)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventInput' }
+      responses:
+        '201':
+          description: Événement créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/events/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Événements]
+      summary: Obtenir un événement
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Événement trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Événements]
+      summary: Modifier un événement non annulé
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventUpdate' }
+      responses:
+        '200':
+          description: Événement modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/events/{id}/status:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    patch:
+      tags: [Événements]
+      summary: Publier ou annuler un événement
+      description: "Transitions permises : brouillon vers publié/annulé, publié vers annulé."
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [published, cancelled] }
+      responses:
+        '200':
+          description: Statut mis à jour
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Event' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/participants:
+    get:
+      tags: [Participants]
+      summary: Rechercher et lister les participants
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: search
+          in: query
+          description: Recherche partielle dans le nom ou l’email
+          schema: { type: string, maxLength: 100 }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Résultats paginés
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedParticipants' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Participants]
+      summary: Créer un participant
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ParticipantInput' }
+      responses:
+        '201':
+          description: Participant créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participant' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/participants/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Participants]
+      summary: Obtenir un participant
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Participant trouvé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participant' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Participants]
+      summary: Modifier un participant
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ParticipantUpdate' }
+      responses:
+        '200':
+          description: Participant modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Participant' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Participants]
+      summary: Supprimer un participant et ses inscriptions
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Participant supprimé }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/registrations:
+    get:
+      tags: [Inscriptions]
+      summary: Lister les inscriptions
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: eventId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending, confirmed, cancelled] }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Résultats paginés
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedRegistrations' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Inscriptions]
+      summary: Inscrire un participant à un événement publié
+      description: Refusé si l’événement n’est pas publié, si le participant est déjà inscrit ou si l’événement est complet.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegistrationInput' }
+      responses:
+        '201':
+          description: Inscription créée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Registration' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/registrations/{id}/status:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    patch:
+      tags: [Inscriptions]
+      summary: Modifier le statut d’une inscription
+      description: La réactivation vérifie la publication de l’événement et les places restantes.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [pending, confirmed, cancelled] }
+      responses:
+        '200':
+          description: Inscription mise à jour
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Registration' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/dashboard/stats:
+    get:
+      tags: [Tableau de bord]
+      summary: Obtenir les statistiques du tableau de bord
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Totaux et cinq événements publiés les plus remplis
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [totalEvents, publishedEvents, registrationsToday, topEvents]
+                properties:
+                  totalEvents: { type: integer }
+                  publishedEvents: { type: integer }
+                  registrationsToday: { type: integer }
+                  topEvents:
+                    type: array
+                    maxItems: 5
+                    items: { $ref: '#/components/schemas/TopEvent' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/users:
+    get:
+      tags: [Utilisateurs]
+      summary: Lister les utilisateurs (admin uniquement)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Utilisateurs sans mot de passe ni hash
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Utilisateurs]
+      summary: Créer un utilisateur (admin uniquement)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserInput' }
+      responses:
+        '201':
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Utilisateurs]
+      summary: Modifier un utilisateur (admin uniquement)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdate' }
+      responses:
+        '200':
+          description: Utilisateur modifié
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Utilisateurs]
+      summary: Supprimer un utilisateur (admin uniquement)
+      description: Un admin ne peut pas supprimer son propre compte ou un utilisateur ayant créé des événements.
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Utilisateur supprimé }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 500 }
+  responses:
+    ValidationError:
+      description: Requête invalide
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Unauthorized:
+      description: Authentification requise ou jeton invalide
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Forbidden:
+      description: Rôle insuffisant
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    NotFound:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Conflict:
+      description: Conflit métier ou ressource déjà existante
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string }
+                  message: { type: string }
+    Pagination:
+      type: object
+      required: [page, limit, total, totalPages]
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+    User:
+      type: object
+      required: [id, email, fullName, role, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        role: { type: string, enum: [admin, staff] }
+        createdAt: { type: string, format: date-time }
+    UserInput:
+      type: object
+      required: [email, password, fullName]
+      properties:
+        email: { type: string, format: email, maxLength: 255 }
+        password: { type: string, minLength: 8, maxLength: 100 }
+        fullName: { type: string, minLength: 2, maxLength: 150 }
+        role: { type: string, enum: [admin, staff], default: staff }
+    UserUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        email: { type: string, format: email, maxLength: 255 }
+        password: { type: string, minLength: 8, maxLength: 100 }
+        fullName: { type: string, minLength: 2, maxLength: 150 }
+        role: { type: string, enum: [admin, staff] }
+    Event:
+      type: object
+      required: [id, title, location, eventDate, maxParticipants, status, createdBy, createdAt, updatedAt, registrationsCount]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description: { type: string, nullable: true }
+        location: { type: string, minLength: 2, maxLength: 255 }
+        eventDate: { type: string, format: date-time }
+        maxParticipants: { type: integer, minimum: 1, maximum: 100000 }
+        status: { type: string, enum: [draft, published, cancelled] }
+        createdBy: { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        registrationsCount: { type: integer, description: Nombre d’inscriptions actives }
+    EventInput:
+      type: object
+      required: [title, location, eventDate, maxParticipants]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description: { type: string, maxLength: 5000, nullable: true }
+        location: { type: string, minLength: 2, maxLength: 255 }
+        eventDate: { type: string, format: date-time, description: Date ISO 8601 ou datetime-local }
+        maxParticipants: { type: integer, minimum: 1, maximum: 100000 }
+    EventUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        description: { type: string, maxLength: 5000, nullable: true }
+        location: { type: string, minLength: 2, maxLength: 255 }
+        eventDate: { type: string, format: date-time }
+        maxParticipants: { type: integer, minimum: 1, maximum: 100000 }
+    Participant:
+      type: object
+      required: [id, fullName, email, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+    ParticipantInput:
+      type: object
+      required: [fullName, email]
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 150 }
+        email: { type: string, format: email, maxLength: 255 }
+        phone: { type: string, nullable: true, maxLength: 30 }
+    ParticipantUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 150 }
+        email: { type: string, format: email, maxLength: 255 }
+        phone: { type: string, nullable: true, maxLength: 30 }
+    Registration:
+      type: object
+      required: [id, eventId, participantId, status, createdAt, updatedAt, participant, event]
+      properties:
+        id: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        participantId: { type: string, format: uuid }
+        status: { type: string, enum: [pending, confirmed, cancelled] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        participant:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            fullName: { type: string }
+            email: { type: string, format: email }
+        event:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            title: { type: string }
+            status: { type: string, enum: [draft, published, cancelled] }
+    RegistrationInput:
+      type: object
+      required: [eventId, participantId]
+      properties:
+        eventId: { type: string, format: uuid }
+        participantId: { type: string, format: uuid }
+        status: { type: string, enum: [pending, confirmed], default: pending }
+    TopEvent:
+      type: object
+      required: [id, title, eventDate, maxParticipants, status, registrationsCount, fillRate]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        eventDate: { type: string, format: date-time }
+        maxParticipants: { type: integer }
+        status: { type: string, enum: [published] }
+        registrationsCount: { type: integer }
+        fillRate: { type: number, format: float }
+    PaginatedEvents:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Event' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+    PaginatedParticipants:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Participant' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+    PaginatedRegistrations:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Registration' }
+        pagination: { $ref: '#/components/schemas/Pagination' }

@@ -1,0 +1,13 @@
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z
+    .string({ required_error: "L'email est requis" })
+    .trim()
+    .toLowerCase()
+    .email('Email invalide'),
+  // Au login on ne vérifie pas la complexité, seulement la présence
+  password: z
+    .string({ required_error: 'Le mot de passe est requis' })
+    .min(1, 'Le mot de passe est requis'),
+});
