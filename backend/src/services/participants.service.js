@@ -7,12 +7,12 @@ const notFound = () => AppError.notFound('Participant introuvable', 'PARTICIPANT
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
 export function create(data) {
-  // Email en double -> violation participants_email_unique -> 409 via errorHandler
+   
   return participantsRepository.create({ ...data, email: normalizeEmail(data.email) });
 }
 
 export async function list(query) {
-  // Limite par défaut plus haute : le formulaire d'inscription charge la liste complète
+   
   const pagination = getPagination(query, { defaultLimit: 100, maxLimit: 500 });
   const { rows, total } = await participantsRepository.findAll({
     search: query.search?.trim(),

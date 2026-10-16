@@ -26,8 +26,8 @@ const baseUserSchema = z.object({
     .default('staff'),
 });
 
-/** POST /api/users */
+ 
 export const createUserSchema = baseUserSchema;
 
-/** PUT /api/users/:id (tous les champs optionnels, au moins un requis) */
+ 
 export const updateUserSchema = baseUserSchema.partial().refine(...atLeastOneField);

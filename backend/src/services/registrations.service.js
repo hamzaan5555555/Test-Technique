@@ -9,14 +9,14 @@ const eventNotFound = () => AppError.notFound('Événement introuvable', 'EVENT_
 const registrationNotFound = () =>
   AppError.notFound('Inscription introuvable', 'REGISTRATION_NOT_FOUND');
 
-/**
- * Règles métier :
- *  1. l'événement doit être publié
- *  2. pas de doublon (participant, événement)
- *  3. maxParticipants non dépassé (les inscriptions cancelled ne comptent pas)
- * Tout se passe dans une transaction avec verrou sur l'événement (FOR UPDATE) :
- * deux inscriptions simultanées sur la dernière place sont traitées l'une après l'autre.
- */
+
+
+
+
+
+
+
+
 export async function create({ eventId, participantId, status }) {
   const initialStatus = status ?? 'pending';
   if (initialStatus === 'cancelled') {
@@ -80,13 +80,13 @@ export async function list(query) {
   return { data: rows, pagination: buildPagination(pagination, total) };
 }
 
-/**
- * Changement de statut d'une inscription.
- * Réactiver une inscription annulée (cancelled -> pending/confirmed) reprend une place :
- * la capacité est donc revérifiée.
- */
+
+
+
+
+
 export async function updateStatus(id, newStatus) {
-  // Lecture simple pour retrouver l'événement à verrouiller
+   
   const preview = await registrationsRepository.findById(id);
   if (!preview) throw registrationNotFound();
 
@@ -94,11 +94,11 @@ export async function updateStatus(id, newStatus) {
     const event = await eventsRepository.lockById(preview.eventId, client);
     if (!event) throw eventNotFound();
 
-    // Relecture après verrou : le statut a pu changer entre-temps
+     
     const registration = await registrationsRepository.findById(id, client);
     if (!registration) throw registrationNotFound();
 
-    // Rien à faire : opération idempotente
+     
     if (registration.status === newStatus) return registration;
 
     const wasActive = registration.status !== 'cancelled';

@@ -16,11 +16,11 @@ import {
 
 const router = Router();
 
-// Admin et staff peuvent gérer les inscriptions
+ 
 router.use(authenticate, authorize('admin', 'staff'));
 
 router.post('/', validate({ body: createRegistrationSchema }), createRegistration);
-// GET /api/registrations?eventId=&status=
+ 
 router.get('/', validate({ query: listRegistrationsQuerySchema }), listRegistrations);
 router.patch(
   '/:id/status',

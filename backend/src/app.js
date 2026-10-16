@@ -17,7 +17,7 @@ const openApiDocument = YAML.parse(
   readFileSync(path.resolve(currentDirectory, '../../openapi.yaml'), 'utf8')
 );
 
-// Sécurité & parsing
+ 
 app.use(helmet());
 app.use(
   cors({
@@ -27,15 +27,15 @@ app.use(
 );
 app.use(express.json({ limit: '1mb' }));
 
-// Logs HTTP (désactivés pendant les tests)
+ 
 if (!env.isTest) {
   app.use(morgan(env.isProduction ? 'combined' : 'dev'));
 }
 
-// Healthcheck (utile pour Docker)
+ 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-// Swagger UI needs inline bootstrap scripts; relax CSP on documentation only.
+ 
 app.use('/api-docs', (req, res, next) => {
   res.removeHeader('Content-Security-Policy');
   next();
@@ -44,12 +44,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument, {
   customSiteTitle: 'EventHub API - Swagger',
 }));
 
-// API
+ 
 app.use('/api', apiRouter);
 
-// 404 puis gestionnaire d'erreurs (toujours en dernier)
+ 
 app.use(notFound);
 app.use(errorHandler);
 
-// Exporté séparément de server.js pour pouvoir tester avec Supertest
+ 
 export default app;

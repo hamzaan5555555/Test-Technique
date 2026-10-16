@@ -21,7 +21,7 @@ const router = Router();
 router.use(authenticate, authorize('admin', 'staff'));
 
 router.post('/', validate({ body: createParticipantSchema }), createParticipant);
-// GET /api/participants?search=
+ 
 router.get('/', validate({ query: listParticipantsQuerySchema }), listParticipants);
 router.get('/:id', validate({ params: idParamSchema }), getParticipant);
 router.put(

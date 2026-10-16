@@ -3,11 +3,11 @@ import { optionalQuery, paginationQuery, uuidSchema } from './common.validator.j
 
 const REGISTRATION_STATUSES = ['pending', 'confirmed', 'cancelled'];
 
-/** POST /api/registrations */
+ 
 export const createRegistrationSchema = z.object({
   eventId: uuidSchema("L'identifiant de l'événement est invalide"),
   participantId: uuidSchema("L'identifiant du participant est invalide"),
-  // 'cancelled' est refusé à la création (voir Registration.service.js)
+   
   status: z
     .enum(['pending', 'confirmed'], {
       invalid_type_error: "Le statut doit être 'pending' ou 'confirmed'",
@@ -15,7 +15,7 @@ export const createRegistrationSchema = z.object({
     .optional(),
 });
 
-/** PATCH /api/registrations/:id/status */
+ 
 export const updateRegistrationStatusSchema = z.object({
   status: z.enum(REGISTRATION_STATUSES, {
     required_error: 'Le statut est requis',
@@ -23,7 +23,7 @@ export const updateRegistrationStatusSchema = z.object({
   }),
 });
 
-/** GET /api/registrations?eventId=&status= */
+ 
 export const listRegistrationsQuerySchema = z.object({
   eventId: optionalQuery(uuidSchema("L'identifiant de l'événement est invalide")),
   status: optionalQuery(

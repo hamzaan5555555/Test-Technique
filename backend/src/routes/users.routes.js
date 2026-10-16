@@ -13,7 +13,7 @@ import {
 
 const router = Router();
 
-// Seul l'admin gère les utilisateurs
+ 
 router.use(authenticate, authorize('admin'));
 
 router.get('/', listUsers);

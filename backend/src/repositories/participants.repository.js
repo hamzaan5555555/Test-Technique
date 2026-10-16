@@ -26,7 +26,7 @@ export async function findById(id, client) {
   return rows[0] ?? null;
 }
 
-/** Recherche ILIKE sur fullName ou email, paginée -> { rows, total }. */
+ 
 export async function findAll({ search, limit, offset }) {
   const params = [];
   let where = '';
@@ -61,7 +61,7 @@ export async function update(id, data, client) {
   return rows[0] ?? null;
 }
 
-/** Les inscriptions du participant sont supprimées en cascade (FK ON DELETE CASCADE). */
+ 
 export async function remove(id, client) {
   const { rowCount } = await db(client).query('DELETE FROM participants WHERE id = $1', [id]);
   return rowCount > 0;

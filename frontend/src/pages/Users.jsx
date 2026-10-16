@@ -113,8 +113,12 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
+      <div className="page-intro page-intro-action">
+        <div>
+          <p className="page-eyebrow">ADMINISTRATION</p>
+          <h1>Utilisateurs</h1>
+          <p className="page-subtitle">Gérez les accès et les rôles de l’équipe EventHub.</p>
+        </div>
         <button
           type="button"
           onClick={openCreateForm}

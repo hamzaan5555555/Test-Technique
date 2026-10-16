@@ -8,10 +8,10 @@ import {
 
 const EVENT_STATUSES = ['draft', 'published', 'cancelled'];
 
-/**
- * Date + heure : accepte "2026-10-20T18:30" (input datetime-local) ou une date ISO complète.
- * Sortie normalisée en ISO 8601 UTC.
- */
+
+
+
+
 const eventDateSchema = z
   .string({ required_error: "La date de l'événement est requise" })
   .trim()
@@ -39,8 +39,8 @@ const baseEventSchema = z.object({
     .max(100000, 'maxParticipants est trop grand'),
 });
 
-// Le statut et createdBy ne sont jamais acceptés ici (supprimés par Zod) :
-// un événement naît en draft, et change de statut via PATCH /:id/status.
+ 
+ 
 export const createEventSchema = baseEventSchema;
 
 export const updateEventSchema = baseEventSchema.partial().refine(...atLeastOneField);

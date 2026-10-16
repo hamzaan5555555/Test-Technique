@@ -18,7 +18,7 @@ export default function RegistrationForm() {
       try {
         const [eventRes, partRes] = await Promise.all([
           api.get(`/events/${eventId}`),
-          api.get('/participants?limit=100') // كنجيبو اللائحة باش نعمرو الـ Select
+          api.get('/participants?limit=100')  
         ]);
         setEvent(eventRes.data);
         setParticipants(partRes.data.data);
@@ -41,9 +41,9 @@ export default function RegistrationForm() {
       await api.post('/registrations', {
         eventId,
         participantId: selectedParticipant,
-        status: 'confirmed' // كنفاليديو التسجيل نيشان للتبسيط
+        status: 'confirmed'  
       });
-      navigate(`/events/${eventId}`); // كنرجعوه لصفحة الحدث
+      navigate(`/events/${eventId}`);  
     } catch (err) {
       setError(err.response?.data?.error?.message || 'Erreur lors de l\'inscription');
     } finally {

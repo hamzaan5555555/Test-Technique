@@ -1,9 +1,6 @@
 import AppError from '../utils/AppError.js';
 
-/**
- * À placer APRÈS authenticate.
- * Usage : router.use(authenticate, authorize('admin', 'staff'));
- */
+
 export const authorize =
   (...allowedRoles) =>
   (req, res, next) => {

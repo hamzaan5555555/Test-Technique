@@ -80,6 +80,7 @@ Cette commande démarre PostgreSQL, l’API et le frontend. L’initialisation a
 
 - `npm run dev` dans `backend` : démarre l’API en mode développement avec surveillance des fichiers.
 - `npm run start` dans `backend` : démarre l’API.
+- `npm test` dans `backend` : exécute les tests unitaires Jest et les tests HTTP Supertest.
 - `npm run dev` dans `frontend` : démarre Vite.
 - `npm run build` dans `frontend` : construit le frontend pour la production.
 

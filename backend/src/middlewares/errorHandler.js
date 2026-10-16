@@ -2,12 +2,12 @@ import { ZodError } from 'zod';
 import AppError from '../utils/AppError.js';
 import { env } from '../config/env.js';
 
-/** 404 pour toute route inconnue. */
+ 
 export function notFound(req, res, next) {
   next(AppError.notFound(`Route introuvable : ${req.method} ${req.originalUrl}`, 'ROUTE_NOT_FOUND'));
 }
 
-// Messages lisibles pour les contraintes définies dans db/schema.sql
+ 
 const CONSTRAINT_MESSAGES = {
   participants_email_unique: 'Un participant avec cet email existe déjà',
   users_email_unique: 'Un utilisateur avec cet email existe déjà',
@@ -15,7 +15,7 @@ const CONSTRAINT_MESSAGES = {
   events_max_positive: 'maxParticipants doit être supérieur à 0',
 };
 
-// Codes d'erreur PostgreSQL les plus courants
+ 
 const PG_ERRORS = {
   '23505': { status: 409, code: 'DUPLICATE', message: 'Cette ressource existe déjà' },
   '23503': { status: 409, code: 'FOREIGN_KEY_VIOLATION', message: 'Référence invalide ou ressource liée existante' },
@@ -24,8 +24,8 @@ const PG_ERRORS = {
   '22P02': { status: 400, code: 'INVALID_INPUT', message: 'Format invalide (ex : identifiant UUID incorrect)' },
 };
 
-/** Gestionnaire d'erreurs global : doit être le DERNIER middleware. */
-// eslint-disable-next-line no-unused-vars
+ 
+ 
 export function errorHandler(err, req, res, next) {
   if (res.headersSent) return next(err);
 

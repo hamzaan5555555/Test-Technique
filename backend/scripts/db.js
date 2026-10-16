@@ -1,4 +1,4 @@
-// Usage : node scripts/db.js <schema|seed|reset>
+ 
 import 'dotenv/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';

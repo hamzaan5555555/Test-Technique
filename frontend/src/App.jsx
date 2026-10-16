@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 
-// جلب الصفحات
+ 
 import Login from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
@@ -11,23 +11,31 @@ import Participants from './pages/Participants';
 import RegistrationForm from './pages/RegistrationForm';
 import Users from './pages/Users';
 
-// هاد الـ Layout كيزيد Navbar الفوق أوتوماتيكيا فاع الصفحات
+ 
 const MainLayout = ({ children }) => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="app-shell">
     <Navbar />
-    <main className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-      {children}
-    </main>
+    <div className="workspace">
+      <header className="workspace-topbar">
+        <div className="workspace-topbar-copy">
+          <span className="workspace-kicker">ESPACE DE GESTION</span>
+          <span className="workspace-context">EventHub <span aria-hidden="true">/</span> Opérations</span>
+        </div>
+        <span className="system-status"><span /> Services opérationnels</span>
+      </header>
+      <main className="workspace-content">{children}</main>
+      <footer className="workspace-footer">EventHub <span>Gestion des événements et des inscriptions</span></footer>
+    </div>
   </div>
 );
 
 export default function App() {
   return (
     <Routes>
-      {/* صفحة تسجيل الدخول (مافيهاش Navbar) */}
+       
       <Route path="/login" element={<Login />} />
       
-      {/* الصفحات المحمية (خصك تكون مكونيكطي باش تشوفهم) */}
+       
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
         <Route path="/events" element={<MainLayout><Events /></MainLayout>} />
@@ -40,7 +48,7 @@ export default function App() {
         <Route path="/users" element={<MainLayout><Users /></MainLayout>} />
       </Route>
 
-      {/* إيلا اليوزر دخل لشي مسار ماكاينش، ردو للداشبورد */}
+       
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

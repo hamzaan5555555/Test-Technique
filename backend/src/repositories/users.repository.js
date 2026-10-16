@@ -1,10 +1,10 @@
 import { pool } from '../config/db.js';
 import { buildUpdate } from '../utils/sql.js';
 
-// `client` optionnel : si fourni (transaction), la requête s'exécute dedans.
+ 
 const db = (client) => client ?? pool;
 
-// Jamais de password_hash dans les colonnes par défaut
+ 
 const COLUMNS = `id, email, full_name AS "fullName", role, created_at AS "createdAt"`;
 
 const UPDATE_COLUMNS = {
@@ -19,7 +19,7 @@ export async function findById(id, client) {
   return rows[0] ?? null;
 }
 
-/** Seule fonction qui renvoie le hash (nécessaire au login). */
+ 
 export async function findByEmail(email, client) {
   const { rows } = await db(client).query(
     `SELECT ${COLUMNS}, password_hash AS "passwordHash" FROM users WHERE email = $1`,

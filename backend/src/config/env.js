@@ -8,7 +8,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(16, 'JWT_SECRET doit contenir au moins 16 caractères'),
   JWT_EXPIRES_IN: z.string().default('1h'),
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(15).default(10),
-  // Plusieurs origines possibles, séparées par des virgules
+   
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
 });
 

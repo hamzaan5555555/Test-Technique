@@ -1,58 +1,54 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Calendar, Users, UserCog, LogOut } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, UserRoundCog, LogOut, PanelTop } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  // هاد الفونكسيون كتعرف واش حنا فديك الصفحة باش تسطر عليها بالزرق
-  const isActive = (path) => location.pathname.startsWith(path);
+   
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
-          <div className="flex">
-            {/* اللوغو */}
-            <div className="flex flex-shrink-0 items-center">
-              <span className="text-xl font-bold text-blue-600">EventHub</span>
-            </div>
-            
-            {/* الروابط ديال الصفحات */}
-            <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
-              <Link to="/dashboard" className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium ${isActive('/dashboard') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-              </Link>
-              <Link to="/events" className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium ${isActive('/events') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                <Calendar className="mr-2 h-4 w-4" /> Événements
-              </Link>
-              <Link to="/participants" className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium ${isActive('/participants') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                <Users className="mr-2 h-4 w-4" /> Participants
-              </Link>
-              {user?.role === 'admin' && (
-                <Link to="/users" className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium ${isActive('/users') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                  <UserCog className="mr-2 h-4 w-4" /> Utilisateurs
-                </Link>
-              )}
-            </div>
-          </div>
+    <aside className="app-sidebar">
+      <Link to="/dashboard" className="brand-lockup" aria-label="EventHub, accueil">
+        <span className="brand-symbol"><PanelTop size={19} strokeWidth={2.2} /></span>
+        <span className="brand-name">event<span>hub</span><small>ORGANISATION</small></span>
+      </Link>
 
-          {/* معلومات اليوزر وزر الخروج */}
-          <div className="flex items-center">
-            <span className="mr-4 text-sm text-gray-600">
-              {user?.fullName} <span className="text-xs font-bold text-blue-600">({user?.role})</span>
-            </span>
-            <button 
-              onClick={logout} 
-              className="rounded-md bg-gray-50 p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
-              title="Se déconnecter"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-          </div>
+      <div className="sidebar-section-label">ESPACE DE TRAVAIL</div>
+      <nav className="primary-nav" aria-label="Navigation principale">
+        <Link to="/dashboard" className={isActive('/dashboard') ? 'nav-item is-active' : 'nav-item'}>
+          <LayoutDashboard size={18} strokeWidth={1.8} /> <span>Vue d’ensemble</span>
+        </Link>
+        <Link to="/events" className={isActive('/events') ? 'nav-item is-active' : 'nav-item'}>
+          <CalendarDays size={18} strokeWidth={1.8} /> <span>Événements</span>
+        </Link>
+        <Link to="/participants" className={isActive('/participants') ? 'nav-item is-active' : 'nav-item'}>
+          <Users size={18} strokeWidth={1.8} /> <span>Participants</span>
+        </Link>
+        {user?.role === 'admin' && (
+          <Link to="/users" className={isActive('/users') ? 'nav-item is-active' : 'nav-item'}>
+            <UserRoundCog size={18} strokeWidth={1.8} /> <span>Utilisateurs</span>
+          </Link>
+        )}
+      </nav>
+
+      <div className="sidebar-bottom">
+        <div className="profile-block">
+          <span className="profile-avatar" aria-hidden="true">
+            {user?.fullName?.trim()?.charAt(0)?.toUpperCase() || 'E'}
+          </span>
+          <span className="profile-copy">
+            <strong>{user?.fullName || 'Compte EventHub'}</strong>
+            <small>{user?.role === 'admin' ? 'Administrateur' : 'Équipe événementielle'}</small>
+          </span>
         </div>
+        <button type="button" onClick={logout} className="signout-button">
+          <LogOut size={17} strokeWidth={1.8} /> Se déconnecter
+        </button>
+        <p className="sidebar-version">EVENTHUB <span>•</span> GESTION</p>
       </div>
-    </nav>
+    </aside>
   );
 }

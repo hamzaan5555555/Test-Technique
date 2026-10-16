@@ -2,7 +2,7 @@ import { pool } from '../config/db.js';
 
 const db = (client) => client ?? pool;
 
-// Inscription + objets imbriqués participant et event (pratique pour le frontend)
+ 
 const SELECT_REGISTRATION = `
   SELECT r.id,
          r.event_id       AS "eventId",
@@ -39,7 +39,7 @@ export async function findByEventAndParticipant(eventId, participantId, client) 
   return rows[0] ?? null;
 }
 
-/** Places prises = inscriptions pending + confirmed (les cancelled libèrent la place). */
+ 
 export async function countActiveByEvent(eventId, client) {
   const { rows } = await db(client).query(
     `SELECT COUNT(*)::int AS count
@@ -50,7 +50,7 @@ export async function countActiveByEvent(eventId, client) {
   return rows[0].count;
 }
 
-/** Liste filtrée (eventId, status) et paginée -> { rows, total }. */
+ 
 export async function findAll({ eventId, status, limit, offset }) {
   const conditions = [];
   const params = [];
@@ -83,7 +83,7 @@ export async function setStatus(id, status, client) {
   await db(client).query('UPDATE registrations SET status = $2 WHERE id = $1', [id, status]);
 }
 
-/** Annulation en masse quand un événement est annulé. */
+ 
 export async function cancelAllByEvent(eventId, client) {
   const { rowCount } = await db(client).query(
     `UPDATE registrations SET status = 'cancelled'

@@ -4,7 +4,7 @@ import { getPagination, buildPagination } from '../utils/pagination.js';
 import * as eventsRepository from '../repositories/events.repository.js';
 import * as registrationsRepository from '../repositories/registrations.repository.js';
 
-// Transitions de statut autorisées
+ 
 const ALLOWED_TRANSITIONS = {
   draft: ['published', 'cancelled'],
   published: ['cancelled'],
@@ -13,7 +13,7 @@ const ALLOWED_TRANSITIONS = {
 
 const notFound = () => AppError.notFound('Événement introuvable', 'EVENT_NOT_FOUND');
 
-/** Un événement est toujours créé en brouillon (draft). */
+ 
 export async function create(data, userId) {
   const { id } = await eventsRepository.create({ ...data, createdBy: userId });
   return eventsRepository.findById(id);
@@ -38,7 +38,7 @@ export async function getById(id) {
 
 export function update(id, data) {
   return withTransaction(async (client) => {
-    // Le verrou évite qu'une inscription concurrente fausse la vérification de capacité
+     
     const event = await eventsRepository.lockById(id, client);
     if (!event) throw notFound();
 
@@ -61,10 +61,10 @@ export function update(id, data) {
   });
 }
 
-/**
- * draft -> published, ou draft/published -> cancelled.
- * Annuler un événement annule TOUTES ses inscriptions, dans la même transaction.
- */
+
+
+
+
 export function updateStatus(id, newStatus) {
   return withTransaction(async (client) => {
     const event = await eventsRepository.lockById(id, client);

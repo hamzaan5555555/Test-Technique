@@ -19,7 +19,7 @@ import {
 
 const router = Router();
 
-// Admin et staff peuvent gérer les événements
+ 
 router.use(authenticate, authorize('admin', 'staff'));
 
 router.post('/', validate({ body: createEventSchema }), createEvent);

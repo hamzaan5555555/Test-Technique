@@ -11,7 +11,7 @@ export function list() {
 
 export async function create({ email, password, fullName, role }) {
   const passwordHash = await bcrypt.hash(password, env.BCRYPT_ROUNDS);
-  // Email déjà pris -> violation users_email_unique -> 409 géré par errorHandler
+   
   return usersRepository.create({
     email: email.trim().toLowerCase(),
     passwordHash,
@@ -21,7 +21,7 @@ export async function create({ email, password, fullName, role }) {
 }
 
 export async function update(id, data, currentUser) {
-  // Évite qu'un admin se retire lui-même ses droits (risque de n'avoir plus aucun admin)
+   
   if (id === currentUser.id && data.role !== undefined && data.role !== currentUser.role) {
     throw AppError.badRequest('Vous ne pouvez pas modifier votre propre rôle', 'CANNOT_CHANGE_OWN_ROLE');
   }
@@ -49,7 +49,7 @@ export async function remove(id, currentUser) {
     const deleted = await usersRepository.remove(id);
     if (!deleted) throw notFound();
   } catch (err) {
-    // events.created_by est ON DELETE RESTRICT
+     
     if (err.code === '23503') {
       throw AppError.conflict(
         'Cet utilisateur a créé des événements et ne peut pas être supprimé',

@@ -158,8 +158,12 @@ export default function Events() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Événements</h1>
+      <div className="page-intro page-intro-action">
+        <div>
+          <p className="page-eyebrow">PROGRAMMATION</p>
+          <h1>Événements</h1>
+          <p className="page-subtitle">Créez, publiez et suivez vos événements.</p>
+        </div>
         <button
           type="button"
           onClick={openCreateForm}
@@ -169,7 +173,7 @@ export default function Events() {
         </button>
       </div>
 
-      <div className="flex flex-wrap items-end gap-4">
+      <div className="filter-toolbar">
         <label className="grid gap-1 text-sm font-medium text-gray-700">
           Statut
           <select

@@ -3,7 +3,7 @@ import { buildUpdate } from '../utils/sql.js';
 
 const db = (client) => client ?? pool;
 
-// registrationsCount = places prises (pending + confirmed)
+ 
 const SELECT_EVENT = `
   SELECT e.id,
          e.title,
@@ -50,11 +50,11 @@ export async function findById(id, client) {
   return rows[0] ?? null;
 }
 
-/**
- * Verrouille la ligne de l'événement (SELECT ... FOR UPDATE) jusqu'à la fin de la
- * transaction : sérialise les inscriptions concurrentes sur un même événement.
- * `client` est OBLIGATOIRE (doit être dans une transaction).
- */
+
+
+
+
+
 export async function lockById(id, client) {
   const { rows } = await client.query(
     `SELECT id, status, max_participants AS "maxParticipants"
@@ -66,7 +66,7 @@ export async function lockById(id, client) {
   return rows[0] ?? null;
 }
 
-/** Liste filtrée (status, date AAAA-MM-JJ) et paginée -> { rows, total }. */
+ 
 export async function findAll({ status, date, limit, offset }) {
   const conditions = [];
   const params = [];

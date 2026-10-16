@@ -129,8 +129,12 @@ export default function Participants() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Participants</h1>
+      <div className="page-intro page-intro-action">
+        <div>
+          <p className="page-eyebrow">BASE DE CONTACTS</p>
+          <h1>Participants</h1>
+          <p className="page-subtitle">Gérez les contacts associés à vos inscriptions.</p>
+        </div>
         <button
           type="button"
           onClick={openCreateForm}
@@ -140,7 +144,7 @@ export default function Participants() {
         </button>
       </div>
 
-      <label className="block max-w-lg text-sm font-medium text-gray-700">
+      <label className="filter-search block max-w-lg text-sm font-medium text-gray-700">
         Rechercher par nom ou email
         <input
           type="search"

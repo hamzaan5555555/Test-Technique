@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { atLeastOneField, optionalQuery, paginationQuery } from './common.validator.js';
 
-// Téléphone facultatif : une chaîne vide est convertie en null
+ 
 const phoneSchema = z.preprocess(
   (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
   z
@@ -30,7 +30,7 @@ export const createParticipantSchema = baseParticipantSchema;
 
 export const updateParticipantSchema = baseParticipantSchema.partial().refine(...atLeastOneField);
 
-// GET /api/participants?search=
+ 
 export const listParticipantsQuerySchema = z.object({
   search: optionalQuery(z.string().trim().max(100, 'La recherche est trop longue')),
   ...paginationQuery,

@@ -7,8 +7,8 @@ const router = Router();
 
 router.use(authenticate, authorize('admin', 'staff'));
 
-// GET /api/dashboard/stats
-// -> { totalEvents, publishedEvents, registrationsToday, topEvents: [...5] }
+ 
+ 
 router.get('/stats', getStats);
 
 export default router;

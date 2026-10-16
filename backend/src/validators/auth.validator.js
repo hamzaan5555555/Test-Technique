@@ -6,7 +6,7 @@ export const loginSchema = z.object({
     .trim()
     .toLowerCase()
     .email('Email invalide'),
-  // Au login on ne vérifie pas la complexité, seulement la présence
+   
   password: z
     .string({ required_error: 'Le mot de passe est requis' })
     .min(1, 'Le mot de passe est requis'),

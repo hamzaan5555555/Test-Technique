@@ -1,6 +1,6 @@
 import * as dashboardRepository from '../repositories/dashboard.repository.js';
 
-/** Les 4 indicateurs sont indépendants : exécutés en parallèle. */
+ 
 export async function getStats() {
   const [totalEvents, publishedEvents, registrationsToday, topEvents] = await Promise.all([
     dashboardRepository.countEvents(),

@@ -87,10 +87,11 @@ export default function EventDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-intro page-intro-action event-detail-heading">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
-          <p className="text-sm text-gray-500 mt-1">{event.location} • {new Date(event.eventDate).toLocaleString()}</p>
+          <p className="page-eyebrow">DÉTAIL DE L’ÉVÉNEMENT</p>
+          <h1>{event.title}</h1>
+          <p className="page-subtitle">{event.location} · {new Date(event.eventDate).toLocaleString('fr-FR')}</p>
         </div>
         <div className="flex items-center space-x-4">
           <StatusBadge status={event.status} />
@@ -111,7 +112,12 @@ export default function EventDetail() {
         </div>
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">Participants inscrits</h2>
+      <div className="section-heading roster-heading">
+        <div>
+          <h2>Inscriptions</h2>
+          <p>{registrationsPagination.total} participant(s) enregistré(s)</p>
+        </div>
+      </div>
       {statusError && <p role="alert" className="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{statusError}</p>}
       <Table headers={['Nom', 'Email', 'Date d\'inscription', 'Statut']}>
         {registrationsLoading ? (

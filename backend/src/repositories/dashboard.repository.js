@@ -12,7 +12,7 @@ export async function countPublishedEvents() {
   return rows[0].count;
 }
 
-/** Inscriptions créées aujourd'hui (hors annulées). */
+ 
 export async function countRegistrationsToday() {
   const { rows } = await pool.query(
     `SELECT COUNT(*)::int AS count
@@ -24,7 +24,7 @@ export async function countRegistrationsToday() {
   return rows[0].count;
 }
 
-/** Top 5 des événements publiés les plus remplis (taux = inscrits actifs / capacité). */
+ 
 export async function findTopEvents(limit = 5) {
   const { rows } = await pool.query(
     `SELECT e.id,
